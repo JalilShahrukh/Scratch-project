@@ -1,39 +1,26 @@
 const express = require('express');
 const path = require('path');
-//const open = require('open');
-//const webpack = require('webpack');
-//const config = require('../webpack.config.dev');
 const bodyParser = require('body-parser');
+const mongoose = require('mongoose');
+const app = express();
+const userController = require('./userController'); 
 
-var googleMapsClient = require('@google/maps').createClient({
+const DB_URI = 'mongodb://starfish4:admin1@ds039441.mlab.com:39441/starfish4'; 
+mongoose.connect(DB_URI); 
+mongoose.connection.once('open', () => { 
+  console.log('Connected to Database.'); 
+});
+
+const googleMapsClient = require('@google/maps').createClient({
   key: 'AIzaSyD-B9yL_qkpkcmHC9G6zE2i-odPFNKoEP4'
 });
 
-const port = 3000;
-const app = express();
-//const compiler = webpack(config);
-
-// app.use(require('webpack-dev-middleware')(compiler, {
-//   noInfo: true,
-//   publicPath: config.output.publicPath
-// }));
-app.use(express.static(path.join(__dirname, './../src')));
+app.use(express.static(path.join(__dirname, './../dist')));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
-app.get('/', function (req, res) {
-  res.sendFile(path.join(__dirname, '../src/index.html'));
-});
-
-app.get('/getResults', function(req,res) {
-  console.log('We have reached the getresults route')
-  res.send([
-    {name:'Shaf house', tags:['favorite', 'guys-night'], googleInfo: [' Astoria, NY 10019, USA']}, 
-    {name:'MoMA', tags:['NYC', 'take Parents', 'cultural'], googleInfo: [' 11 W 53rd St, New York, NY 10019, USA']},
-    {name:'Central Park South', tags:['NYC', 'take Parents', 'date night'], googleInfo: [' 160 Central Park S, New York, NY 10019, USA']}
-  ]);
-
-});
+app.post('/signup', userController.createUser);
+app.post('/login', userController.verifyUser);
 
 app.post('/addLocation', function(req, res) {
   let addedData = {};
@@ -47,7 +34,7 @@ app.post('/addLocation', function(req, res) {
   googleMapsClient.geocode({
     address: req.body.name
   }, function(err, response) {
-    if (!err) {
+    if (!err) { 
       console.log('In server side - google map result[0].formatted_address: ',response.json.results[0].formatted_address);
       addedData.googleInfo = [];
       addedData.googleInfo.push(response.json.results[0].formatted_address);
@@ -58,12 +45,8 @@ app.post('/addLocation', function(req, res) {
       res.json(addedData);
     }
   });
-  // res.json(addedData);
 });
 
-app.listen(port, function (error) {
-  if (error) console.log(error);
-  // } else {
-  //     open(`http://localhost:${port}`)
-  // }
+app.listen(3000, (err) => {
+  if (err) return err;
 });

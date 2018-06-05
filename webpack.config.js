@@ -2,7 +2,7 @@ const webpack = require('webpack');
 const path = require('path');
 
 const entry = [
-  './src/index.js'
+  './dist/index.js'
 ];
 
 const output = {

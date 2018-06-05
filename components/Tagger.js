@@ -72,17 +72,7 @@ class Tagger extends Component {
 		}
 
 		componentWillMount = () => {
-			let that = this;
-			const { datas } = this.state; 
-			fetch('/getResults')
-			.then(function(res) {
-				return res.json();
-			})
-			.then(function(response) {
-				that.setState({
-					datas : datas.concat(response)
-				});
-			});
+			
 		}
 
     render(){
